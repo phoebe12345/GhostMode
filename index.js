@@ -1,18 +1,25 @@
 const express = require('express')
 const path = require('path')
+const cors = require('cors');
 
 const port = process.env.PORT || 5006
-
+const messages = [
+  {author:'one', message:"hello000000", timestamp: 0},
+  {author:'two', message:"hello hello", timestamp: 2},
+  {author:'three', message:"how are you", timestamp: 3},
+]
 const app = express()
-
-app.use(express.static(path.join(__dirname, 'public')))
+app.use(cors());
 app.use(express.json());
-app.set('views', path.join(__dirname, 'views'))
-app.set('view engine', 'ejs')
 
-app.get('/', (req, res) => {
-  res.render('pages/index')
-})
+// Serve the static files from the React build folder
+app.use(express.static(path.join(__dirname, 'build')));
+
+// Serve the React app's index.html for any non-API route
+app.get('/', (__, res) => {
+  res.sendFile(path.join(__dirname, 'build', 'index.html'));
+});
+
 
 app.get('/read', (req, res) => {
   const timestamp = req.query.timestamp;
@@ -20,32 +27,43 @@ app.get('/read', (req, res) => {
   if (!timestamp) {
       return res.status(400).json({ error: 'Timestamp is required' });
   }
-
+  const last_index=messages.length - 1
   res.json({
       message: 'Data read successfully',
-      timestamp: timestamp + 2,
-      data: [1, 2, 3], // Example data
+      timestamp: messages[last_index].timestamp,
+      data: messages
   });
 });
 
 app.post('/send', (req, res) => {
-  console.log('im heree', req.body)
+  console.log('Received message:', req.body);
 
-  if(!req.body){
-    return res.status(400).json({error: 'message cannot be empty'});
+  if (!req.body || !req.body.inputString) {
+    return res.status(400).json({ error: 'Message cannot be empty' });
   }
-  const inputString = req.body.inputString;
-  if(!inputString){
-    return res.status(400).json({error: 'inputString does not exist'});
+
+  const inputString = req.body.inputString.trim();
+
+  if (inputString.length === 0) {
+    return res.status(400).json({ error: 'Message cannot be only spaces' });
   }
-  const trimmed = inputString.trim();
+
+  // Create a new message object
+  const newMessage = {
+    author: 'User', 
+    message: inputString,
+    timestamp: Date.now() 
+  };
+
+  messages.push(newMessage);
+
+  console.log('Message added:', newMessage);
   
-  if(trimmed.length == 0){
-    return res.status(400).json({error: 'message cannot be spaces'});
-  }
-
-  console.log('hhhh',req.body, trimmed);
-  res.json({ receivedString: trimmed });
+  res.json({
+    message: 'Message sent successfully',
+    newMessage,
+    allMessages: messages
+  });
 });
 
 
