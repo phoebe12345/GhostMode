@@ -2,7 +2,7 @@ const express = require('express')
 const path = require('path')
 const cors = require('cors');
 
-const port = process.env.PORT || 5000
+const port = process.env.PORT || 5006
 
 const messages = [
   {author:'one', message:"hello000000", timestamp: 0},
@@ -12,9 +12,6 @@ const messages = [
 const app = express()
 app.use(cors());
 app.use(express.json());
-app.listen(port, () => {
-  console.log(`Server running on port ${port}`);
-});
 
 // Serve the static files from the React build folder
 app.use(express.static(path.join(__dirname, 'build')));
