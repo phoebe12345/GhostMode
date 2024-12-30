@@ -1,0 +1,13 @@
+{
+	"folders": [
+		{
+			"name": "node-js-getting-started",
+			"path": "."
+		},
+		{
+			"name": "build",
+			"path": "../react-js/my-react-app/build"
+		}
+	],
+	"settings": {}
+}
